@@ -24,16 +24,20 @@ use std::sync::{Arc, Mutex, RwLock};
 // result type returned by fastping_rs::Pinger::new()
 pub type NewPingerResult = Result<(Pinger, Receiver<PingResult>), String>;
 
-// ping result type.  Idle represents pings that have not received a repsonse within the max_rtt.
-// Receive represents pings which have received a repsonse
+// ping result type.
+// - Idle: pings that have not received a repsonse within the max_rtt.
+// - Receive: pings which have received a repsonse
+// - Unreachable: pings where for some reason we could not send a packet (e.g.
+//   IPv6 target on IPv6-less host)
 pub enum PingResult {
     Idle{addr: IpAddr},
     Receive{addr: IpAddr, rtt: Duration},
+    Unreachable{addr: IpAddr},
 }
 
 pub struct Pinger {
     // Number of milliseconds of an idle timeout. Once it passed,
-	// the library calls an idle callback function.  Default is 2000
+    // the library calls an idle callback function.  Default is 2000
     max_rtt: Arc<Duration>,
 
     // map of addresses to ping on each run
